@@ -34,6 +34,7 @@ function add(){
     
         wrapper.innerHTML=''; // her eklemede önceki kullanıcı isimleri tekrar tekrar yazılmasına önlem amaçlı oyuncuların ve skorların yer aldığı div boşaltılıyor
         let sorted = playerData.sort(function(a, b){return b.score - a.score}); // sıralanmış playerData arrayi
+        
         // bulunan veri lengthi kadar eleman oluşturup içlerini skorlar büyükten küçüğe gidecek şekilde sıralılıyoruz
         for(let i=0; i<playerData.length; i++){
             let p = document.createElement('p');
@@ -80,12 +81,11 @@ function del(){
 
 
 function increase(){
-    incArr.sort(function(a, b){return b - a}); // her artım sonrası tekrardan sıralama yapılıyor
     let find = Number(this.previousSibling.previousSibling.textContent); // p elamanın içerisinde yer alan sayıyı buluyor
     let findIndex = incArr.indexOf(find); //p elemanı içerisine yer alan sayıya göre index numarası buluyor
-
     playerData[findIndex].score += 5; // o indexe ait elemanın değerini 5 büyütüyor
     this.previousSibling.previousSibling.textContent = `${incArr[findIndex] += 5}`; // p elemanı içerisine yazılacak yeni skor değerini güncelliyor
+    incArr.sort(function(a, b){return b - a}); // her artım sonrası tekrardan sıralama yapılıyor
     wrapper.innerHTML=''; // alt alta aynı bilgilerin yığını oluşmaması için tüm oyuncu listesini kapsayan divin içerisi boşaltıldı
     let sorted = playerData.sort(function(a, b){return b.score - a.score}); // playerData arrayinin sıralayıp bir değişkene atadık. Oluşturulan text kısmında kullanıldığı için
     // for döngüsü add fonksiyonun for döngüsü ile aynı
@@ -119,12 +119,12 @@ function increase(){
 
 
 function decrease(){
-    incArr.sort(function(a, b){return b - a}); // her azaltım sonrası tekrardan sıralama yapılıyor
     let find = Number(this.previousSibling.previousSibling.previousSibling.textContent); // p elamanın içerisinde yer alan sayıyı buluyor
     let findIndex = incArr.indexOf(find); //p elemanı içerisine yer alan sayıya göre index numarası buluyor
 
     playerData[findIndex].score -= 5;  // o indexe ait elemanın değerini 5 küçültüyor
     this.previousSibling.previousSibling.previousSibling.textContent = `${incArr[findIndex] -= 5}`;  // p elemanı içerisine yazılacak yeni skor değerini güncelliyor
+    incArr.sort(function(a, b){return b - a}); // her azaltım sonrası tekrardan sıralama yapılıyor
     // burdan sonraki kısım add fonksiyonu ile aynı
     wrapper.innerHTML='';
     let sorted = playerData.sort(function(a, b){return b.score - a.score});
