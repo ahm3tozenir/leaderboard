@@ -1,163 +1,128 @@
 // html elemanları seçimi
-const playerName = document.querySelector('.player-name');
-const playerScore = document.querySelector('.player-score');
-const btn = document.querySelector('.add-btn');
-const wrapper = document.querySelector('.wrapper');
+const nameInput = document.querySelector(".player-name");
+const scoreInput = document.querySelector(".player-score");
 const toast = document.querySelector('.toast');
-const nantoast = document.querySelector('.toast-NaN');
+const toastNaN = document.querySelector('.toast-NaN');
 
-// oyuncu bilgilerinin kayıt edildiği arrayler birisi object olarak tüm verilerin tutumu için, incArr sayıların artması ve azalması durumunda yeniden sıralanması için
-let playerData = [];
-let incArr = [];
-btn.addEventListener('click',add);
+// oyuncu bilgilerinin kayıt edildiği array
+let users = [];
 
-// add butonuna tıklandığında çalışacak fonksiyon
-function add(){
-    // input verilerin alınması
-    let score = Number(playerScore.value); 
-    let name = playerName.value;
-    
-    // boş girilmesine önlem olarak hata mesajı çıkıyor
-    if(name.trim() == '' || playerScore.value.trim() == ''){
-        toast.classList.add('visible');
-        setTimeout(hideToast, 3000);
-    }
-    // skor kısmına rakam hariç giriş olması durumunda çıkan hata mesajı
-    else if(isNaN(score)){
-        nantoast.classList.add('visible');
-        setTimeout(hideToast, 3000);
-    }
-    else{
-        playerData.push({'name': name, 'score': score}); // playerData arrayine isim ve skor bilgisinin gönderimi
-        incArr.push(score); // ekleme ve çıkarma için bu arreye de skorları gönderiyoruz
-        incArr.sort(function(a, b){return b - a}); // incArr için büyükten küçüğe puana göre sıralanma
-    
-        wrapper.innerHTML=''; // her eklemede önceki kullanıcı isimleri tekrar tekrar yazılmasına önlem amaçlı oyuncuların ve skorların yer aldığı div boşaltılıyor
-        let sorted = playerData.sort(function(a, b){return b.score - a.score}); // sıralanmış playerData arrayi
-        
-        // bulunan veri lengthi kadar eleman oluşturup içlerini skorlar büyükten küçüğe gidecek şekilde sıralılıyoruz
-        for(let i=0; i<playerData.length; i++){
-            let p = document.createElement('p');
-            let ps = document.createElement('p');
-            let div = document.createElement('div');
-            div.style.display='flex';
-            div.classList.add('item');
+// add butonuna tıklandığında çalışacak fonksiyon  
+function addUser() {
 
-            const span = document.createElement('span');
-            const span2 = document.createElement('span');
-            const span3 = document.createElement('span');
-            span.innerHTML=`<i class="fa-regular fa-trash-can"></i>`;
-            span2.innerHTML=`<i class="fa-solid fa-plus"></i> 5`;
-            span3.innerHTML=`<i class="fa-solid fa-minus"></i> 5`;
-            p.textContent =`${sorted[i].name}`;
-            ps.textContent =`${sorted[i].score}`;
-            // oluşturulan elemanlar bir üst parentlarına append ediliyor
-            div.append(p);
-            div.append(ps);
-            div.append(span);
-            div.append(span2);
-            div.append(span3);
-            wrapper.append(div);
-            // span içerikleri için eventlistener atandı
-            span.addEventListener('click',del);
-            span2.addEventListener('click',increase);
-            span3.addEventListener('click',decrease);
-        }
-        // her add buttonuna basım sonrası inputların içerisi boşaltılıyor
-        playerName.value = '';
-        playerScore.value = '';
-    }
+  let name = nameInput.value.trim();
+  let score = parseInt(scoreInput.value);
 
+  if (name !== '' && !isNaN(score)){
+    let user = {
+      id: Date.now(), 
+      name: name,
+      score: score
+    };
+    // users arrayine isim ve skor bilgisinin gönderimi
+    users.push(user);
+     // bulunan veri lengthi kadar eleman oluşturup içlerini skorlar büyükten küçüğe gidecek şekilde sıralılıyoruz
+    users.sort((a, b) => b.score - a.score);
+
+    // oluşturan kullanıcılar sıralı bir şekilde geliyor
+    displayUsers();
+
+    nameInput.value = '';
+    scoreInput.value = '';
+  }
+  // boş girilmesine önlem olarak hata mesajı çıkıyor
+  else if(name == '' || scoreInput.value == ''){
+    toast.classList.add('visible');
+    setTimeout(hideToast, 3000);
+  }
+  // skor kısmına rakam hariç giriş olması durumunda çıkan hata mesajı
+  else{
+    toastNaN.classList.add('visible');
+    setTimeout(hideToast, 3000);
+  }
 }
 
-function del(){
-    let find = Number(this.previousSibling.textContent); // p elamanın içerisinde yer alan sayıyı buluyor
-    let findIndex = incArr.indexOf(find); //p elemanı içerisine yer alan sayıya göre index numarası buluyor
-    this.parentElement.style.display='none'; 
-    // display none olan eleman playerData ve incArr den de splice methodu ile siliniyor
-    playerData.splice(findIndex,1); 
-    incArr.splice(findIndex,1);
+function displayUsers() {
+  let usersContainer = document.querySelector(".wrapper");
+  usersContainer.innerHTML = '';
+
+  
+  for (let i = 0; i < users.length; i++) {
+    let user = users[i];
+
+    let userDiv = document.createElement('div');
+    userDiv.classList.add('item');
+
+    let nameP = document.createElement('p');
+    nameP.textContent = user.name;
+
+    let scoreP = document.createElement('p');
+    scoreP.textContent = user.score;
+
+    let increaseButton = document.createElement('span');
+    increaseButton.innerHTML = '<i class="fa-solid fa-plus"></i>';
+    increaseButton.onclick = createIncreaseHandler(user);
+
+    let decreaseButton = document.createElement('span');
+    decreaseButton.innerHTML= '<i class="fa-solid fa-minus"></i>';
+    decreaseButton.onclick = createDecreaseHandler(user);
+
+    let deleteButton = document.createElement('span');
+    deleteButton.innerHTML = '<i class="fa-regular fa-trash-can"></i>';
+    deleteButton.onclick = createDeleteHandler(user);
+
+    // oluşturulan elemanlar bir üst parentlarına append ediliyor
+    userDiv.appendChild(nameP);
+    userDiv.appendChild(scoreP);
+    userDiv.appendChild(deleteButton);
+    userDiv.appendChild(increaseButton);
+    userDiv.appendChild(decreaseButton);
+
+
+    usersContainer.appendChild(userDiv);
+  }
 }
 
-
-function increase(){
-    let find = Number(this.previousSibling.previousSibling.textContent); // p elamanın içerisinde yer alan sayıyı buluyor
-    let findIndex = incArr.indexOf(find); //p elemanı içerisine yer alan sayıya göre index numarası buluyor
-    playerData[findIndex].score += 5; // o indexe ait elemanın değerini 5 büyütüyor
-    this.previousSibling.previousSibling.textContent = `${incArr[findIndex] += 5}`; // p elemanı içerisine yazılacak yeni skor değerini güncelliyor
-    incArr.sort(function(a, b){return b - a}); // her artım sonrası tekrardan sıralama yapılıyor
-    wrapper.innerHTML=''; // alt alta aynı bilgilerin yığını oluşmaması için tüm oyuncu listesini kapsayan divin içerisi boşaltıldı
-    let sorted = playerData.sort(function(a, b){return b.score - a.score}); // playerData arrayinin sıralayıp bir değişkene atadık. Oluşturulan text kısmında kullanıldığı için
-    // for döngüsü add fonksiyonun for döngüsü ile aynı
-    for(let i=0; i<playerData.length; i++){
-        let p = document.createElement('p');
-        let ps = document.createElement('p');
-        let div = document.createElement('div');
-        div.style.display='flex';
-        div.classList.add('item');
-
-        const span = document.createElement('span');
-        const span2 = document.createElement('span');
-        const span3 = document.createElement('span');
-        span.innerHTML=`<i class="fa-regular fa-trash-can"></i>`;
-        span2.innerHTML=`<i class="fa-solid fa-plus"></i> 5`;
-        span3.innerHTML=`<i class="fa-solid fa-minus"></i> 5`;
-        p.textContent =`${sorted[i].name}`;
-        ps.textContent =`${sorted[i].score}`;
-        div.append(p);
-        div.append(ps);
-        div.append(span);
-        div.append(span2);
-        div.append(span3);
-        wrapper.append(div)
-        span.addEventListener('click',del);
-        span2.addEventListener('click',increase);
-        span3.addEventListener('click',decrease);
-    }
+function createIncreaseHandler(user) {
+  return function() {
+    increaseScore(user);
+  };
 }
 
-
-
-function decrease(){
-    let find = Number(this.previousSibling.previousSibling.previousSibling.textContent); // p elamanın içerisinde yer alan sayıyı buluyor
-    let findIndex = incArr.indexOf(find); //p elemanı içerisine yer alan sayıya göre index numarası buluyor
-
-    playerData[findIndex].score -= 5;  // o indexe ait elemanın değerini 5 küçültüyor
-    this.previousSibling.previousSibling.previousSibling.textContent = `${incArr[findIndex] -= 5}`;  // p elemanı içerisine yazılacak yeni skor değerini güncelliyor
-    incArr.sort(function(a, b){return b - a}); // her azaltım sonrası tekrardan sıralama yapılıyor
-    // burdan sonraki kısım add fonksiyonu ile aynı
-    wrapper.innerHTML='';
-    let sorted = playerData.sort(function(a, b){return b.score - a.score});
-    for(let i=0; i<playerData.length; i++){
-        let p = document.createElement('p');
-        let ps = document.createElement('p');
-        let div = document.createElement('div');
-        div.style.display='flex';
-        div.classList.add('item');
-
-        const span = document.createElement('span');
-        const span2 = document.createElement('span');
-        const span3 = document.createElement('span');
-        span.innerHTML=`<i class="fa-regular fa-trash-can"></i>`;
-        span2.innerHTML=`<i class="fa-solid fa-plus"></i> 5`;
-        span3.innerHTML=`<i class="fa-solid fa-minus"></i> 5`;
-        p.textContent =`${sorted[i].name}`;
-        ps.textContent =`${sorted[i].score}`;
-        div.append(p);
-        div.append(ps);
-        div.append(span);
-        div.append(span2);
-        div.append(span3);
-        wrapper.append(div)
-        span.addEventListener('click',del);
-        span2.addEventListener('click',increase);
-        span3.addEventListener('click',decrease);
-    }
+function createDecreaseHandler(user) {
+  return function() {
+    decreaseScore(user);
+  };
 }
 
+function createDeleteHandler(user) {
+  return function() {
+    deleteUser(user);
+  };
+}
+
+function increaseScore(user) {
+  user.score += 5;
+  users.sort((a, b) => b.score - a.score); // ekleme işlemi sonrası yeniden sıralanma
+  displayUsers();
+}
+
+function decreaseScore(user){
+  user.score -= 5;
+  users.sort((a, b) => b.score - a.score); // çıkarma işlemi sonrası yeniden sıralanma
+  displayUsers();
+}
+
+function deleteUser(user) {
+  let index = users.findIndex(u => u.id === user.id); // findIndex ile id koşulu sağlanması durumunda o object elemanın indexini alıyor
+  if (index !== -1) {
+    users.splice(index, 1); //splice methodu ile users arrayinden ilgili index'e sahip eleman siliniyor
+    displayUsers();
+  }
+}
 
 function hideToast(){
-    // toast bildirimleri için css de yer alan display özelliğinin atanmasını classList.remove kullanarak kaldırılıyor
-    toast.classList.remove('visible');
-    nantoast.classList.remove('visible');
+  // toast bildirimleri için css de yer alan display özelliğinin atanmasını classList.remove kullanarak kaldırılıyor
+  toast.classList.remove('visible');
+  toastNaN.classList.remove('visible');
 }
